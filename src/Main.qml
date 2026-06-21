@@ -37,6 +37,14 @@ ApplicationWindow {
         noticeText = text;
         noticeTimer.restart();
     }
+    function openVideo() {
+        backend.openVideoDialog();
+    }
+    function exportVideo() {
+        if (!win.hasVideo || backend.duration <= 0 || backend.busy)
+            return;
+        backend.exportDialog(trimBar.startSec, trimBar.endSec);
+    }
     function togglePlay() {
         if (!win.hasVideo || backend.duration <= 0)
             return;
@@ -57,6 +65,26 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         enabled: win.hasVideo
         onActivated: togglePlay()
+    }
+
+    Shortcut {
+        sequence: "Return"
+        context: Qt.ApplicationShortcut
+        enabled: win.hasVideo && backend.duration > 0 && !backend.busy
+        onActivated: exportVideo()
+    }
+
+    Shortcut {
+        sequence: "Enter"
+        context: Qt.ApplicationShortcut
+        enabled: win.hasVideo && backend.duration > 0 && !backend.busy
+        onActivated: exportVideo()
+    }
+
+    Shortcut {
+        sequence: "Escape"
+        context: Qt.ApplicationShortcut
+        onActivated: openVideo()
     }
 
     MediaPlayer {
@@ -229,7 +257,7 @@ ApplicationWindow {
             MouseArea {
                 anchors.fill: parent
                 cursorShape: Qt.PointingHandCursor
-                onClicked: backend.openVideoDialog()
+                onClicked: openVideo()
             }
 
             Button {
@@ -251,7 +279,7 @@ ApplicationWindow {
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
-                onClicked: backend.openVideoDialog()
+                onClicked: openVideo()
             }
         }
 
@@ -290,7 +318,7 @@ ApplicationWindow {
                 buttonColor: "#2c2c2f"
                 tipText: "Export"
                 enabled: backend.duration > 0 && !backend.busy
-                onClicked: backend.exportDialog(trimBar.startSec, trimBar.endSec)
+                onClicked: exportVideo()
             }
         }
 
