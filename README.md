@@ -4,18 +4,23 @@ A dead-simple video **length** trimmer. Open a video, drag the two yellow handle
 
 **Qt Quick (QML)** UI with the Material style — the same Qt stack Quickshell builds on — and **ffmpeg** for the cut. The C++ side compiles to a single executable; the QML is embedded in it via Qt resources.
 
-## Requirements
+## Install
 
-- A C++17 compiler and Qt6: `qt6-base`, `qt6-declarative` (Qt Quick + Controls),
-  `qt6-multimedia`
-- `xdg-desktop-portal` and a portal backend for the file picker
-- `ffmpeg` and `ffprobe` on your PATH (used at runtime)
+Install via the Omarchy Package Repository via the `omacut` package. It's installed by default in new installations of Omarchy (from Quattro forward).
 
-On Arch / Omarchy:
+## Run
+
+You can run omacut via the .desktop app through your launcher or via the terminal using:
 
 ```bash
-sudo pacman -S --needed qt6-base qt6-declarative qt6-multimedia xdg-desktop-portal ffmpeg
+./build/omacut
+./build/omacut clip.mp4
 ```
+
+## Requirements
+
+- `xdg-desktop-portal` and a portal backend for the file picker
+- `ffmpeg` and `ffprobe` on your PATH (used at runtime)
 
 ## Build
 
@@ -27,24 +32,22 @@ Uses Qt's own build tool, `qmake6` (no cmake needed):
 
 This produces a single `omacut` binary in `build/`.
 
+Requirements:
+
+- A C++17 compiler and Qt6: `qt6-base`, `qt6-declarative` (Qt Quick + Controls),
+  `qt6-multimedia`
+
 ## Test
 
 ```bash
 ./bin/test
 ```
 
-## Run
-
-```bash
-./build/omacut
-./build/omacut clip.mp4
-```
-
 ## Using it
 
-- Click **Open a video** or the empty preview to load a video.
+- Click **Open a video** or the preview to load or replace a video.
 - The first frame is shown as soon as the video is ready.
-- The status line says `Loading...` while thumbnails are generated.
+- The status line says `Loading...` while the thumbnail strip fills in.
 - Drag the **left/right yellow handles** to set the start and end.
 - While dragging a trim handle, a small timestamp bubble shows that handle's time.
 - Click inside the strip or drag the white playhead to **scrub**.
@@ -60,7 +63,7 @@ Build and install the local Arch package:
 ./bin/install
 ```
 
-This runs `makepkg -si` from `pkgbuild/`. Extra arguments are passed through to `makepkg`, for example `./bin/install --clean`. The package installs the binary, desktop entry, app icon, and MIT license. Local package outputs such as `pkgbuild/pkg/`, `pkgbuild/src/`, and `*.pkg.tar.*` are ignored.
+This runs `./bin/build`, then `makepkg -si` from `pkgbuild/`. Extra arguments are passed through to `makepkg`, for example `./bin/install --clean`. The package installs the binary, desktop entry, app icon, and MIT license. Local package outputs such as `pkgbuild/pkg/`, `pkgbuild/src/`, and `*.pkg.tar.*` are ignored.
 
 ## License
 
