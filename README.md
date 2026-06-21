@@ -1,21 +1,20 @@
-# omacut
+# Omacut
 
-A dead-simple video **length** trimmer.
-Open a video, drag the two yellow handles to pick a start and end, preview the
-clip, and export. **Qt Quick (QML)** UI with the Material style — the same Qt
-stack Quickshell builds on — and **ffmpeg** for the cut. The C++ side compiles
-to a single executable; the QML is embedded in it via Qt resources.
+A dead-simple video **length** trimmer. Open a video, drag the two yellow handles to pick a start and end, preview the clip, and export.
+
+**Qt Quick (QML)** UI with the Material style — the same Qt stack Quickshell builds on — and **ffmpeg** for the cut. The C++ side compiles to a single executable; the QML is embedded in it via Qt resources.
 
 ## Requirements
 
 - A C++17 compiler and Qt6: `qt6-base`, `qt6-declarative` (Qt Quick + Controls),
   `qt6-multimedia`
+- `xdg-desktop-portal` and a portal backend for the file picker
 - `ffmpeg` and `ffprobe` on your PATH (used at runtime)
 
 On Arch / Omarchy:
 
 ```bash
-sudo pacman -S --needed qt6-base qt6-declarative qt6-multimedia ffmpeg
+sudo pacman -S --needed qt6-base qt6-declarative qt6-multimedia xdg-desktop-portal ffmpeg
 ```
 
 ## Build
@@ -23,39 +22,70 @@ sudo pacman -S --needed qt6-base qt6-declarative qt6-multimedia ffmpeg
 Uses Qt's own build tool, `qmake6` (no cmake needed):
 
 ```bash
-mkdir -p build && cd build
-qmake6 ../omacut.pro
-make -j$(nproc)
+./bin/build
 ```
 
 This produces a single `omacut` binary in `build/`.
 
+## Test
+
+```bash
+./bin/test
+```
+
 ## Run
 
 ```bash
-./omacut              # then click Open…
-./omacut clip.mp4     # or open a file directly
+./build/omacut
+./build/omacut clip.mp4
 ```
 
 ## Using it
 
-- **Open…** loads a video, shows its first frame, and builds a thumbnail
-  filmstrip.
+- Click **Open a video** or the empty preview to load a video.
+- The first frame is shown as soon as the video is ready.
+- The status line says `Loading...` while thumbnails are generated.
 - Drag the **left/right yellow handles** to set the start and end.
+- While dragging a trim handle, a small timestamp bubble shows that handle's time.
 - Click inside the strip or drag the white playhead to **scrub**.
 - **Play / Space** previews just the selected clip (auto-stops at the end).
-- **Export…** writes a frame-accurate trimmed video next to the original.
+- The export button opens a portal save dialog and suggests `<name>_trimmed.<ext>` next to the original.
+- Exports are re-encoded with `libx264`/`aac` for frame-accurate cuts.
+
+## Package
+
+Build and install the local Arch package:
+
+```bash
+cd pkgbuild
+makepkg -si
+```
+
+The package installs the binary, desktop entry, app icon, and MIT license. Local package outputs such as `pkgbuild/pkg/`, `pkgbuild/src/`, and `*.pkg.tar.*` are ignored.
+
+## License
+
+MIT. See `LICENSE`.
 
 ## Source layout
 
 | File | Role |
 |------|------|
-| `Main.qml`        | The window: video preview, controls, file dialogs. |
-| `TrimBar.qml`     | The filmstrip + draggable trim handles (custom QML). |
-| `main.cpp`        | Entry point: sets the Material style, wires QML ↔ C++. |
-| `backend.*`       | QObject exposed to QML: load, thumbnails, export. |
-| `thumbprovider.*` | Serves filmstrip thumbnails to QML `Image` elements. |
-| `thumbworker.*`   | Background thread that builds the filmstrip thumbnails. |
-| `ffmpeg.*`        | ffprobe/ffmpeg wrappers (probe, thumbnail, trim). |
-| `resources.qrc`   | Embeds the QML into the binary. |
+| `src/Main.qml`        | The window: video preview, controls, file dialogs. |
+| `src/TrimBar.qml`     | The filmstrip + draggable trim handles (custom QML). |
+| `src/main.cpp`        | Entry point: sets the Material style, wires QML ↔ C++. |
+| `src/backend.*`       | QObject exposed to QML: load, thumbnails, export. |
+| `src/filepicker.h`    | Small file picker interface used by the backend and tests. |
+| `src/portalfilepicker.*` | XDG desktop portal file picker implementation. |
+| `src/thumbprovider.*` | Serves filmstrip thumbnails to QML `Image` elements. |
+| `src/thumbworker.*`   | Background thread that builds the filmstrip thumbnails. |
+| `src/ffmpeg.*`        | ffprobe/ffmpeg wrappers (probe, thumbnail, trim). |
+| `src/resources.qrc`   | Embeds the QML into the binary. |
 | `omacut.pro`      | qmake project file. |
+| `tests/`          | Qt Test backend coverage. |
+| `bin/build`       | Local build helper. |
+| `bin/test`        | Local test helper. |
+| `pkgbuild/PKGBUILD`        | Arch package recipe. |
+| `pkgbuild/omacut.svg`      | Application icon (installed to the hicolor theme). |
+| `pkgbuild/omacut.desktop`  | Desktop entry: launcher menu + video file association. |
+| `pkgbuild/omacut.install`  | pacman hook: refreshes desktop/icon caches on install. |

@@ -3,20 +3,20 @@ CONFIG += c++17 testcase
 TARGET = backend_tests
 TEMPLATE = app
 
-INCLUDEPATH += ..
+INCLUDEPATH += ../src
 
 HEADERS += \
-    ../backend.h \
-    ../ffmpeg.h \
-    ../filepicker.h \
-    ../portalfilepicker.h \
-    ../thumbprovider.h \
-    ../thumbworker.h
+    ../src/backend.h \
+    ../src/ffmpeg.h \
+    ../src/filepicker.h \
+    ../src/portalfilepicker.h \
+    ../src/thumbprovider.h \
+    ../src/thumbworker.h
 
 SOURCES += \
     backend_tests.cpp \
-    ../backend.cpp \
-    ../ffmpeg.cpp \
-    ../portalfilepicker.cpp \
-    ../thumbprovider.cpp \
-    ../thumbworker.cpp
+    ../src/backend.cpp \
+    ../src/ffmpeg.cpp \
+    ../src/portalfilepicker.cpp \
+    ../src/thumbprovider.cpp \
+    ../src/thumbworker.cpp

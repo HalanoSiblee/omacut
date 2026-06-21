@@ -23,7 +23,7 @@ private:
         Export
     };
 
-    void requestFile(const QString &method, const QString &title,
+    bool requestFile(const QString &method, const QString &title,
                      const QVariantMap &options, Action action);
     void clearPending();
 

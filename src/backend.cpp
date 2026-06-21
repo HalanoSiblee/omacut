@@ -23,6 +23,10 @@ Backend::Backend(ThumbProvider *provider, FilePicker *filePicker, QObject *paren
     wireFilePicker();
 }
 
+Backend::~Backend() {
+    stopThumbs();
+}
+
 void Backend::wireFilePicker() {
     connect(m_filePicker, &FilePicker::openSelected, this, &Backend::load);
     connect(m_filePicker, &FilePicker::exportSelected, this, &Backend::exportClip);
@@ -56,6 +60,7 @@ bool Backend::load(const QUrl &url) {
     m_source = url;
 
     // New video: drop the old filmstrip and bump the revision so QML reloads.
+    stopThumbs();
     m_thumbCount = 0;
     ++m_thumbRevision;
     m_provider->setImages({});
@@ -80,27 +85,36 @@ void Backend::exportDialog(double start, double end) {
 }
 
 void Backend::startThumbs() {
-    auto *worker = new ThumbWorker(m_path, m_info.duration, kThumbCount, this);
+    auto *worker = new ThumbWorker(m_path, m_info.duration, kThumbCount);
+    m_thumbWorker = worker;
+
     connect(worker, &ThumbWorker::ready, this, [this, worker](const QVector<QImage> &images) {
+        if (worker != m_thumbWorker)
+            return;
         m_provider->setImages(images);
         m_thumbCount = images.size();
         ++m_thumbRevision;
         emit thumbsChanged();
         setStatus(QString());
-        worker->deleteLater();
     });
-    connect(worker, &ThumbWorker::finished, worker, [worker] {
-        // Safety net if `ready` was never delivered.
-        if (worker->parent())
-            worker->deleteLater();
+    connect(worker, &ThumbWorker::finished, this, [this, worker] {
+        if (worker == m_thumbWorker)
+            m_thumbWorker = nullptr;
+        worker->deleteLater();
     });
     worker->start();
 }
 
-QUrl Backend::sourceFolder() const {
-    if (m_path.isEmpty())
-        return {};
-    return QUrl::fromLocalFile(QFileInfo(m_path).absolutePath());
+void Backend::stopThumbs() {
+    if (!m_thumbWorker)
+        return;
+
+    ThumbWorker *worker = m_thumbWorker;
+    m_thumbWorker = nullptr;
+    worker->disconnect(this);
+    worker->requestInterruption();
+    worker->wait();
+    delete worker;
 }
 
 QUrl Backend::suggestedExportUrl() const {

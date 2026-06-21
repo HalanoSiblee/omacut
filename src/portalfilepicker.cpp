@@ -44,16 +44,17 @@ void PortalFilePicker::exportVideo(const QUrl &suggestedUrl, double start, doubl
     options.insert(QStringLiteral("current_folder"), portalPathBytes(target.absolutePath()));
     options.insert(QStringLiteral("current_name"), target.fileName());
 
-    m_pendingExportStart = start;
-    m_pendingExportEnd = end;
-    requestFile(QStringLiteral("SaveFile"), QStringLiteral("Export trimmed video"),
-                options, Action::Export);
+    if (requestFile(QStringLiteral("SaveFile"), QStringLiteral("Export trimmed video"),
+                    options, Action::Export)) {
+        m_pendingExportStart = start;
+        m_pendingExportEnd = end;
+    }
 }
 
-void PortalFilePicker::requestFile(const QString &method, const QString &title,
+bool PortalFilePicker::requestFile(const QString &method, const QString &title,
                                    const QVariantMap &options, Action action) {
-    if (!m_pendingPath.isEmpty())
-        return;
+    if (m_pendingAction != Action::None)
+        return false;
 
     QDBusInterface portal(QStringLiteral("org.freedesktop.portal.Desktop"),
                           QStringLiteral("/org/freedesktop/portal/desktop"),
@@ -61,7 +62,7 @@ void PortalFilePicker::requestFile(const QString &method, const QString &title,
                           QDBusConnection::sessionBus());
     if (!portal.isValid()) {
         emit failed(QStringLiteral("The XDG desktop portal file chooser is not available."));
-        return;
+        return false;
     }
 
     m_pendingAction = action;
@@ -89,6 +90,7 @@ void PortalFilePicker::requestFile(const QString &method, const QString &title,
             emit failed(QStringLiteral("Could not listen for the portal file picker response."));
         }
     });
+    return true;
 }
 
 void PortalFilePicker::handleResponse(uint response, const QVariantMap &results) {

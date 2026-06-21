@@ -1,6 +1,7 @@
 // omacut — a dead-simple video length trimmer. Qt Quick (QML) UI, ffmpeg cuts.
 
 #include <QGuiApplication>
+#include <QIcon>
 #include <QImage>
 #include <QMetaType>
 #include <QQmlApplicationEngine>
@@ -16,20 +17,25 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName("omacut");
 
+    // Associates the window with omacut.desktop so the compositor (Wayland app_id
+    // = this name) and taskbars pick up our installed icon.
+    app.setDesktopFileName("omacut");
+    app.setWindowIcon(QIcon::fromTheme("omacut"));
+
     // Modern, themeable controls (the same family Quickshell builds on).
     QQuickStyle::setStyle("Material");
 
     // Lets the worker threads deliver results across threads.
     qRegisterMetaType<QVector<QImage>>("QVector<QImage>");
-    qRegisterMetaType<QVector<double>>("QVector<double>");
+
+    auto *provider = new ThumbProvider();
+    Backend backend(provider, &app);
 
     QQmlApplicationEngine engine;
 
     // The engine takes ownership of the image provider.
-    auto *provider = new ThumbProvider();
     engine.addImageProvider("thumbs", provider);
 
-    Backend backend(provider, &app);
     engine.rootContext()->setContextProperty("backend", &backend);
 
     engine.load(QUrl("qrc:/Main.qml"));

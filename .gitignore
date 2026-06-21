@@ -1,6 +1,7 @@
-build/
-pkg/
-src/
+/build/
+/pkg/
+/pkgbuild/pkg/
+/pkgbuild/src/
 *.pkg.tar.*
 *.src.tar.*
 *.o

@@ -60,18 +60,6 @@ VideoInfo probe(const QString &path) {
     }
 
     info.duration = durationStr.toDouble();
-    info.width = stream.value("width").toInt();
-    info.height = stream.value("height").toInt();
-
-    // r_frame_rate comes as "num/den", e.g. "30000/1001".
-    const QString rate = stream.value("r_frame_rate").toString();
-    const int slash = rate.indexOf('/');
-    if (slash > 0) {
-        const double num = rate.left(slash).toDouble();
-        const double den = rate.mid(slash + 1).toDouble();
-        if (den > 0.0)
-            info.fps = num / den;
-    }
 
     info.ok = info.duration > 0.0;
     if (!info.ok)

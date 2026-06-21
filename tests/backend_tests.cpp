@@ -102,8 +102,6 @@ void BackendTests::pickerSelectionLoadsVideo() {
     QCOMPARE(infoSpy.count(), 1);
     QCOMPARE(backend.source(), videoUrl());
     QVERIFY(backend.duration() > 0);
-    QCOMPARE(backend.videoWidth(), 32);
-    QCOMPARE(backend.videoHeight(), 32);
     waitForBackgroundWork(backend);
 }
 

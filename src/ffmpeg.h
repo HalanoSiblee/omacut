@@ -10,14 +10,11 @@ namespace ffmpeg {
 struct VideoInfo {
     QString path;
     double duration = 0.0;  // seconds
-    int width = 0;
-    int height = 0;
-    double fps = 0.0;
     bool ok = false;
     QString error;
 };
 
-// Probe a file for duration, dimensions and frame rate (runs ffprobe).
+// Probe a file for a usable video stream and duration (runs ffprobe).
 VideoInfo probe(const QString &path);
 
 // Grab a single frame at `time` seconds, scaled to `height` px.

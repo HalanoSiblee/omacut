@@ -5,19 +5,19 @@ TARGET = omacut
 TEMPLATE = app
 
 HEADERS += \
-    filepicker.h \
-    portalfilepicker.h \
-    ffmpeg.h \
-    thumbworker.h \
-    thumbprovider.h \
-    backend.h
+    src/filepicker.h \
+    src/portalfilepicker.h \
+    src/ffmpeg.h \
+    src/thumbworker.h \
+    src/thumbprovider.h \
+    src/backend.h
 
 SOURCES += \
-    main.cpp \
-    portalfilepicker.cpp \
-    ffmpeg.cpp \
-    thumbworker.cpp \
-    thumbprovider.cpp \
-    backend.cpp
+    src/main.cpp \
+    src/portalfilepicker.cpp \
+    src/ffmpeg.cpp \
+    src/thumbworker.cpp \
+    src/thumbprovider.cpp \
+    src/backend.cpp
 
-RESOURCES += resources.qrc
+RESOURCES += src/resources.qrc
