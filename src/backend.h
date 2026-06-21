@@ -22,6 +22,7 @@ class Backend : public QObject {
     Q_PROPERTY(int thumbRevision READ thumbRevision NOTIFY thumbsChanged)
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(QString status READ status NOTIFY statusChanged)
+    Q_PROPERTY(bool lossless READ lossless WRITE setLossless NOTIFY losslessChanged)
 
 public:
     explicit Backend(ThumbProvider *provider, QObject *parent = nullptr);
@@ -36,6 +37,13 @@ public:
     int thumbRevision() const { return m_thumbRevision; }
     bool busy() const { return m_busy; }
     QString status() const { return m_status; }
+    bool lossless() const { return m_lossless; }
+    void setLossless(bool value) {
+        if (m_lossless == value)
+            return;
+        m_lossless = value;
+        emit losslessChanged();
+    }
 
     // Load a video (probes it, then kicks off thumbnail generation).
     Q_INVOKABLE bool load(const QUrl &url);
@@ -55,6 +63,7 @@ signals:
     void thumbsChanged();
     void busyChanged();
     void statusChanged();
+    void losslessChanged();
     void exportDone(const QString &path);
     void exportFailed(const QString &message);
     void loadError(const QString &message);
@@ -80,5 +89,6 @@ private:
     bool m_thumbWorkerDone = false;
     bool m_busy = false;
     QString m_status;
+    bool m_lossless = false;
     QTimer m_thumbRevealTimer;
 };
