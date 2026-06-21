@@ -31,7 +31,7 @@ void PortalFilePicker::openVideo() {
     options.insert(QStringLiteral("multiple"), false);
     options.insert(QStringLiteral("current_folder"), portalPathBytes(QDir::homePath()));
 
-    requestFile(QStringLiteral("OpenFile"), QStringLiteral("Open video"), options, Action::Open);
+    requestFile(QStringLiteral("OpenFile"), QStringLiteral("Open Video File"), options, Action::Open);
 }
 
 void PortalFilePicker::exportVideo(const QUrl &suggestedUrl, double start, double end) {
@@ -44,7 +44,7 @@ void PortalFilePicker::exportVideo(const QUrl &suggestedUrl, double start, doubl
     options.insert(QStringLiteral("current_folder"), portalPathBytes(target.absolutePath()));
     options.insert(QStringLiteral("current_name"), target.fileName());
 
-    if (requestFile(QStringLiteral("SaveFile"), QStringLiteral("Export trimmed video"),
+    if (requestFile(QStringLiteral("SaveFile"), QStringLiteral("Save Video File"),
                     options, Action::Export)) {
         m_pendingExportStart = start;
         m_pendingExportEnd = end;
