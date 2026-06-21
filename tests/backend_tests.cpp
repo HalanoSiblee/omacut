@@ -37,6 +37,8 @@ private slots:
     void initTestCase();
     void openDialogDelegatesToFilePicker();
     void pickerSelectionLoadsVideo();
+    void thumbnailSlotsAreExposedImmediately();
+    void thumbProviderUsesRevisionPrefixedIds();
     void exportDialogDelegatesSuggestedUrlAndRange();
     void trimArgsReencodeForPreciseCuts();
 
@@ -103,6 +105,35 @@ void BackendTests::pickerSelectionLoadsVideo() {
     QCOMPARE(backend.source(), videoUrl());
     QVERIFY(backend.duration() > 0);
     waitForBackgroundWork(backend);
+}
+
+void BackendTests::thumbnailSlotsAreExposedImmediately() {
+    ThumbProvider provider;
+    auto *picker = new FakeFilePicker;
+    Backend backend(&provider, picker);
+    QSignalSpy thumbsSpy(&backend, &Backend::thumbsChanged);
+
+    QVERIFY(backend.load(videoUrl()));
+
+    QVERIFY(backend.thumbCount() > 0);
+    QCOMPARE(backend.thumbReadyCount(), 0);
+    waitForBackgroundWork(backend);
+    QCOMPARE(backend.thumbReadyCount(), backend.thumbCount());
+    QVERIFY(thumbsSpy.count() > 2);
+}
+
+void BackendTests::thumbProviderUsesRevisionPrefixedIds() {
+    ThumbProvider provider;
+    provider.setImages(QVector<QImage>(2));
+
+    QImage image(2, 2, QImage::Format_RGB32);
+    image.fill(Qt::red);
+    provider.setImage(1, image);
+
+    QSize size;
+    QVERIFY(provider.requestImage(QStringLiteral("4/0"), &size, QSize()).isNull());
+    QVERIFY(!provider.requestImage(QStringLiteral("4/1"), &size, QSize()).isNull());
+    QCOMPARE(size, image.size());
 }
 
 void BackendTests::exportDialogDelegatesSuggestedUrlAndRange() {

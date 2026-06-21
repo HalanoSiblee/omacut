@@ -11,6 +11,7 @@ Item {
     property real endSec: 0
     property real playheadSec: 0
     property int thumbCount: 0
+    property int thumbReadyCount: 0
     property int thumbRevision: 0
     // True while the user is dragging anything, so the player won't fight the UI.
     property bool interacting: false
@@ -71,7 +72,9 @@ Item {
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     cache: false
-                    source: "image://thumbs/" + index + "?" + root.thumbRevision
+                    source: index < root.thumbReadyCount
+                        ? "image://thumbs/" + root.thumbRevision + "/" + index
+                        : ""
                 }
             }
         }

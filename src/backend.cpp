@@ -11,6 +11,7 @@
 
 namespace {
 constexpr int kThumbCount = 12;
+constexpr int kThumbRevealMs = 70;
 }
 
 Backend::Backend(ThumbProvider *provider, QObject *parent)
@@ -21,6 +22,8 @@ Backend::Backend(ThumbProvider *provider, FilePicker *filePicker, QObject *paren
     if (!m_filePicker->parent())
         m_filePicker->setParent(this);
     wireFilePicker();
+    m_thumbRevealTimer.setInterval(kThumbRevealMs);
+    connect(&m_thumbRevealTimer, &QTimer::timeout, this, &Backend::revealNextThumb);
 }
 
 Backend::~Backend() {
@@ -61,9 +64,12 @@ bool Backend::load(const QUrl &url) {
 
     // New video: drop the old filmstrip and bump the revision so QML reloads.
     stopThumbs();
-    m_thumbCount = 0;
+    m_thumbCount = kThumbCount;
+    m_thumbAvailableCount = 0;
+    m_thumbReadyCount = 0;
+    m_thumbWorkerDone = false;
     ++m_thumbRevision;
-    m_provider->setImages({});
+    m_provider->setImages(QVector<QImage>(kThumbCount));
     emit thumbsChanged();
 
     emit infoChanged();
@@ -88,24 +94,46 @@ void Backend::startThumbs() {
     auto *worker = new ThumbWorker(m_path, m_info.duration, kThumbCount);
     m_thumbWorker = worker;
 
-    connect(worker, &ThumbWorker::ready, this, [this, worker](const QVector<QImage> &images) {
+    connect(worker, &ThumbWorker::thumbReady, this, [this, worker](int index, const QImage &image) {
         if (worker != m_thumbWorker)
             return;
-        m_provider->setImages(images);
-        m_thumbCount = images.size();
-        ++m_thumbRevision;
-        emit thumbsChanged();
-        setStatus(QString());
+        m_provider->setImage(index, image);
+        m_thumbAvailableCount = qMax(m_thumbAvailableCount, index + 1);
+        if (m_thumbReadyCount == 0)
+            revealNextThumb();
+        if (!m_thumbRevealTimer.isActive())
+            m_thumbRevealTimer.start();
     });
     connect(worker, &ThumbWorker::finished, this, [this, worker] {
-        if (worker == m_thumbWorker)
+        if (worker == m_thumbWorker) {
             m_thumbWorker = nullptr;
+            m_thumbWorkerDone = true;
+            if (m_thumbReadyCount >= m_thumbCount)
+                setStatus(QString());
+            else if (!m_thumbRevealTimer.isActive())
+                m_thumbRevealTimer.start();
+        }
         worker->deleteLater();
     });
     worker->start();
 }
 
+void Backend::revealNextThumb() {
+    if (m_thumbReadyCount < m_thumbAvailableCount) {
+        ++m_thumbReadyCount;
+        emit thumbsChanged();
+    }
+
+    if (m_thumbReadyCount < m_thumbAvailableCount)
+        return;
+
+    m_thumbRevealTimer.stop();
+    if (m_thumbWorkerDone && m_thumbReadyCount >= m_thumbCount)
+        setStatus(QString());
+}
+
 void Backend::stopThumbs() {
+    m_thumbRevealTimer.stop();
     if (!m_thumbWorker)
         return;
 

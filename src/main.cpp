@@ -2,13 +2,10 @@
 
 #include <QGuiApplication>
 #include <QIcon>
-#include <QImage>
-#include <QMetaType>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QQuickStyle>
 #include <QUrl>
-#include <QVector>
 
 #include "backend.h"
 #include "thumbprovider.h"
@@ -24,9 +21,6 @@ int main(int argc, char *argv[]) {
 
     // Modern, themeable controls (the same family Quickshell builds on).
     QQuickStyle::setStyle("Material");
-
-    // Lets the worker threads deliver results across threads.
-    qRegisterMetaType<QVector<QImage>>("QVector<QImage>");
 
     auto *provider = new ThumbProvider();
     Backend backend(provider, &app);

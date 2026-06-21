@@ -228,7 +228,6 @@ ApplicationWindow {
 
             MouseArea {
                 anchors.fill: parent
-                enabled: !win.hasVideo
                 cursorShape: Qt.PointingHandCursor
                 onClicked: backend.openVideoDialog()
             }
@@ -242,6 +241,9 @@ ApplicationWindow {
                 focusPolicy: Qt.NoFocus
                 font.pixelSize: 18
                 Material.foreground: "black"
+                HoverHandler {
+                    cursorShape: Qt.PointingHandCursor
+                }
                 contentItem: Label {
                     text: openVideoButton.text
                     font: openVideoButton.font
@@ -275,6 +277,7 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 durationSec: backend.duration
                 thumbCount: backend.thumbCount
+                thumbReadyCount: backend.thumbReadyCount
                 thumbRevision: backend.thumbRevision
                 onScrub: (seconds) => player.position = Math.round(seconds * 1000)
             }
