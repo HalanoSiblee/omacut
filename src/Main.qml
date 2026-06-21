@@ -322,6 +322,24 @@ ApplicationWindow {
             }
         }
 
+        // --- controls ---
+        RowLayout {
+            visible: win.hasVideo
+            Layout.fillWidth: true
+            spacing: 16
+
+            CheckBox {
+                id: losslessCheckbox
+                text: "Lossless (faster, less accurate)"
+                checked: backend.lossless
+                onCheckedChanged: backend.lossless = checked
+                ToolTip.visible: hovered
+                ToolTip.text: "Use stream copy for faster export. May not be frame-accurate at trim points."
+            }
+
+            Item { Layout.fillWidth: true }
+        }
+
         // --- status line ---
         Item {
             visible: win.hasVideo
