@@ -330,11 +330,11 @@ ApplicationWindow {
 
             CheckBox {
                 id: losslessCheckbox
-                text: "Lossless (faster, less accurate)"
+                text: "Lossless"
                 checked: backend.lossless
                 onCheckedChanged: backend.lossless = checked
                 ToolTip.visible: hovered
-                ToolTip.text: "Use stream copy for faster export. May not be frame-accurate at trim points."
+                ToolTip.text: "Use stream copy for faster export, same codec audio/video. May not be frame-accurate at trim points."
             }
 
             Item { Layout.fillWidth: true }
