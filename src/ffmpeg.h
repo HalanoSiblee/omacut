@@ -22,8 +22,9 @@ VideoInfo probe(const QString &path);
 QImage thumbnail(const QString &path, double time, int height = 90);
 
 // Build the ffmpeg argument list that writes [start, end] of src to dst.
-// Cuts are frame-accurate and re-encoded with libx264/aac.
-QStringList trimArgs(const QString &src, const QString &dst, double start, double end);
+// If lossless is true, uses stream copy (no re-encoding).
+// If lossless is false, cuts are frame-accurate and re-encoded with libx264/aac.
+QStringList trimArgs(const QString &src, const QString &dst, double start, double end, bool lossless = false);
 
 // Locate a tool on PATH; returns empty string if missing.
 QString toolPath(const QString &tool);
