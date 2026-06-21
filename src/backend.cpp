@@ -168,7 +168,7 @@ void Backend::exportClip(const QUrl &dst, double start, double end) {
     setBusy(true);
     setStatus(QStringLiteral("Exporting…"));
 
-    const QStringList args = ffmpeg::trimArgs(m_path, outPath, start, end);
+    const QStringList args = ffmpeg::trimArgs(m_path, outPath, start, end, m_lossless);
 
     auto *proc = new QProcess(this);
     proc->setProcessChannelMode(QProcess::MergedChannels);
