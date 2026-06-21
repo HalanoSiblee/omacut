@@ -57,11 +57,10 @@ This produces a single `omacut` binary in `build/`.
 Build and install the local Arch package:
 
 ```bash
-cd pkgbuild
-makepkg -si
+./bin/install
 ```
 
-The package installs the binary, desktop entry, app icon, and MIT license. Local package outputs such as `pkgbuild/pkg/`, `pkgbuild/src/`, and `*.pkg.tar.*` are ignored.
+This runs `makepkg -si` from `pkgbuild/`. Extra arguments are passed through to `makepkg`, for example `./bin/install --clean`. The package installs the binary, desktop entry, app icon, and MIT license. Local package outputs such as `pkgbuild/pkg/`, `pkgbuild/src/`, and `*.pkg.tar.*` are ignored.
 
 ## License
 
@@ -85,6 +84,7 @@ MIT. See `LICENSE`.
 | `tests/`          | Qt Test backend coverage. |
 | `bin/build`       | Local build helper. |
 | `bin/test`        | Local test helper. |
+| `bin/install`     | Local Arch package build/install helper. |
 | `pkgbuild/PKGBUILD`        | Arch package recipe. |
 | `pkgbuild/omacut.svg`      | Application icon (installed to the hicolor theme). |
 | `pkgbuild/omacut.desktop`  | Desktop entry: launcher menu + video file association. |
