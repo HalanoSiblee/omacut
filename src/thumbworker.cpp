@@ -2,14 +2,50 @@
 
 #include "ffmpeg.h"
 
+#include <algorithm>
+#include <deque>
+#include <future>
+
+namespace {
+constexpr int kMaxThumbJobs = 4;
+}
+
 void ThumbWorker::run() {
-    for (int i = 0; i < m_count; ++i) {
+    if (m_count <= 0)
+        return;
+
+    const int idealThreads = std::max(1, QThread::idealThreadCount());
+    const int maxJobs = std::min({m_count, kMaxThumbJobs, idealThreads});
+
+    std::deque<std::future<QImage>> jobs;
+    int nextIndex = 0;
+    int emitIndex = 0;
+
+    const auto startNextJob = [this, &jobs, &nextIndex] {
+        const int index = nextIndex++;
+        const double time = m_duration * (index + 0.5) / m_count;
+        const QString path = m_path;
+        jobs.push_back(std::async(std::launch::async, [path, time] {
+            return ffmpeg::thumbnail(path, time);
+        }));
+    };
+
+    while (nextIndex < m_count && static_cast<int>(jobs.size()) < maxJobs)
+        startNextJob();
+
+    while (!jobs.empty()) {
         if (isInterruptionRequested())
             return;
-        const double t = m_duration * (i + 0.5) / m_count;
-        const QImage img = ffmpeg::thumbnail(m_path, t);
+
+        QImage image = jobs.front().get();
+        jobs.pop_front();
+
         if (isInterruptionRequested())
             return;
-        emit thumbReady(i, img);
+
+        emit thumbReady(emitIndex++, image);
+
+        if (nextIndex < m_count)
+            startNextJob();
     }
 }
